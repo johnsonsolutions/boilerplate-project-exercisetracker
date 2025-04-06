@@ -60,25 +60,34 @@ app.post("/api/users", async (req, res) => {
   
 });
 
-app.post("/api/users/:_id/excercises", async (req, res)=>{
+app.post("/api/users/:_id/exercises", async (req, res) => {
+
+  let user = await User.findById(req.params._id);
+
+
+  let checkdate = req.body.date == "" ? new Date(Date.now()).toISOString() : req.body.date;
+
   try{
     let excercise = new Excercise({
-      username: req.body.username,
+      username: user.username,
       description: req.body.description,
       duration: req.body.duration,
-      date: req.body.date,
+      date: checkdate,
       _id: req.params._id
     });
 
     let savedExcercise = await excercise.save();
 
-    res.json({
-      username: savedExcercise.username,
-      description: savedExcercise.description,
-      duration: savedExcercise.duration,
+
+    let op = {
+      _id: user._id,
+      username: user.username,
       date: savedExcercise.date,
-      _id: savedExcercise._id
-    });
+      duration: savedExcercise.duration,
+      description: savedExcercise.description      
+    };
+    res.json(op);
+
   }
   catch(err){ res.status(500).json({ error: err.message }); }
 });
@@ -88,4 +97,28 @@ app.get("/api/users", async (req, res)=>{
   res.json(users);
 });
 
+app.get("/api/users/:_id/logs", async (req, res)=>{
+try{
+  let exercises = await Excercise.find({_id: req.params._id});
+  let log = await Log.findById(req.params._id);
+
+  let count = await Excercise.count();
+  console.log(count);
+
+
+  let op = {
+    _id: log._id,
+    username: log.username,
+    count: count,
+    log: exercises
+  };
+
+  res.json(logs);
+}
+catch(err){ res.status(500).json({ error: err.message }); }
+
+});
+
+
 exports.UserModel = User;
+exports.ExcerciseModel = Excercise;

@@ -18,6 +18,7 @@ const ExcerciseSchema = new Schema({
   date: String,
   _id: String
 });
+const Excercise = mongoose.model("Excercise", ExcerciseSchema);
 
 const UserSchema = new Schema({
   username: {type: String, required: true}
@@ -34,6 +35,7 @@ const LogSchema = new Schema({
     date: String,
   }]
 });
+const Log = mongoose.model("Log", LogSchema);
 
 app.use(cors())
 app.use(express.static('public'))
@@ -48,17 +50,42 @@ const listener = app.listen(process.env.PORT || 3000, () => {
 
 app.post("/api/users", async (req, res) => {
   
-  const createUser = async (done) => {
-    try{
-      let user = new User({ username: req.body.username });
-      let savedUser = await user.save();
+  try{
+    let user = new User({ username: req.body.username });
+    let savedUser = await user.save();
 
-      res.json({ username: savedUser.username, _id: savedUser._id });
-    } 
-    catch(err){ res.status(500).json({error: 'Failed to create user'}); }
-  }
+    res.json({ username: savedUser.username, _id: savedUser._id });
+  } 
+  catch(err){ res.status(500).json({error: err.message }); }
   
 });
 
+app.post("/api/users/:_id/excercises", async (req, res)=>{
+  try{
+    let excercise = new Excercise({
+      username: req.body.username,
+      description: req.body.description,
+      duration: req.body.duration,
+      date: req.body.date,
+      _id: req.params._id
+    });
+
+    let savedExcercise = await excercise.save();
+
+    res.json({
+      username: savedExcercise.username,
+      description: savedExcercise.description,
+      duration: savedExcercise.duration,
+      date: savedExcercise.date,
+      _id: savedExcercise._id
+    });
+  }
+  catch(err){ res.status(500).json({ error: err.message }); }
+});
+
+app.get("/api/users", async (req, res)=>{
+  let users = await User.find();
+  res.json(users);
+});
 
 exports.UserModel = User;

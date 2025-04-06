@@ -4,6 +4,7 @@ const cors = require('cors')
 require('dotenv').config()
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { type } = require('express/lib/response');
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -11,26 +12,26 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const Schema = mongoose.Schema;
 
 const Excercise = new Schema({
-  username: "fcc_test",
-  description: "test",
-  duration: 60,
-  date: "Mon Jan 01 1990",
-  _id: "5fb5853f734231456ccb3b05"
+  username: {type: String},
+  description: {type: String, required: true},
+  duration: {type:Number, required: true},
+  date: String,
+  _id: String
 });
 
 const User = new Schema({
-  username: "fcc_test",
-  _id: "5fb5853f734231456ccb3b05"
+  username: {type: String, required: true},
+  _id: {type: String, required: true}
 });
 
 const Log = new Schema({
-  username: "fcc_test",
-  count: 1,
-  _id: "5fb5853f734231456ccb3b05",
+  username: String,
+  count: Number,
+  _id: String,
   log: [{
-    description: "test",
-    duration: 60,
-    date: "Mon Jan 01 1990",
+    description: String,
+    duration: Number,
+    date: String,
   }]
 });
 
@@ -48,7 +49,7 @@ const listener = app.listen(process.env.PORT || 3000, () => {
 
 //Endpoints
 
-app.post("api/users", function(res, req){
+app.post("/api/users", function(res, req){
   
   let user = new User({
     username: "fcc_test",

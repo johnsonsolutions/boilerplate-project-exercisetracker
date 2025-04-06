@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 const Schema = mongoose.Schema;
 
-const Excercise = new Schema({
+const ExcerciseSchema = new Schema({
   username: {type: String},
   description: {type: String, required: true},
   duration: {type:Number, required: true},
@@ -19,12 +19,12 @@ const Excercise = new Schema({
   _id: String
 });
 
-const User = new Schema({
-  username: {type: String, required: true},
-  _id: {type: String, required: true}
+const UserSchema = new Schema({
+  username: {type: String, required: true}
 });
+const User = mongoose.model("User", UserSchema);
 
-const Log = new Schema({
+const LogSchema = new Schema({
   username: String,
   count: Number,
   _id: String,
@@ -46,22 +46,19 @@ const listener = app.listen(process.env.PORT || 3000, () => {
 })
 
 
-
-//Endpoints
-
-app.post("/api/users", function(res, req){
+app.post("/api/users", async (req, res) => {
   
-  let user = new User({
-    username: "fcc_test",
-    _id: "5fb5853f734231456ccb3b05"
-  });
+  const createUser = async (done) => {
+    try{
+      let user = new User({ username: req.body.username });
+      let savedUser = await user.save();
 
-  user.save(function(err, data){
-    if(err) return done(err);
-    done(null, data);
-  });
-
-  res.json({username: user.username, _id: user._id});
+      res.json({ username: savedUser.username, _id: savedUser._id });
+    } 
+    catch(err){ res.status(500).json({error: 'Failed to create user'}); }
+  }
+  
 });
-app.post("api/users", function(res, req){});
-app.post("api/users", function(res, req){});
+
+
+exports.UserModel = User;
